@@ -18,7 +18,7 @@ class TestCache(TestCase):
             text='Тестовый текст кэша',
             author=cls.user,
         )
-    
+
     def test_index_cache(self):
         # очищаем кеш от других тестов
         cache.clear()
