@@ -1,9 +1,7 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase, Client
-from posts.models import Group, Post, Comment
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
+from posts.models import Post
 from django.urls import reverse
-from django import forms
 from django.core.cache import cache
 # from django.core.cache.utils import make_template_fragment_key
 
@@ -20,7 +18,7 @@ class TestCache(TestCase):
             text='Тестовый текст кэша',
             author=cls.user,
         )
-
+    
     def test_index_cache(self):
         # очищаем кеш от других тестов
         cache.clear()
@@ -32,7 +30,9 @@ class TestCache(TestCase):
         TestCache.post.delete()
         # Проверяем, что он остался в кэше
         response = self.client.get(reverse('posts:index'))
-        self.assertIn(TestCache.post.text, response.getvalue().decode('UTF8'))
+        self.assertIn(
+            TestCache.post.text, response.getvalue().decode('UTF8')
+        )
         # очищаем кэш
         cache.clear()
         # Проверяем, что кэш очищен и текста поста в ответе нет
