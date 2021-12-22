@@ -10,9 +10,8 @@ import shutil
 
 User = get_user_model()
 
-# Создаем временную папку для медиа-файлов;
-# на момент теста медиа папка будет переопределена
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
+
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostCreateFormTests(TestCase):
@@ -33,21 +32,18 @@ class PostCreateFormTests(TestCase):
             text='Тестовый текст',
         )
         cls.comment = Comment.objects.create(
-            post= cls.post,
+            post=cls.post,
             author=cls.user,
-            text='Тестовый комментарий'            
+            text='Тестовый комментарий'
         )
 
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
-        
+
     def setUp(self):
-        
-        # self.user = User.objects.create_user(self.user)
         self.authorized_client.force_login(self.user)
-        
 
     def test_create_post(self):
         """Валидная форма создает запись в Post и происходит редирект"""
@@ -78,7 +74,7 @@ class PostCreateFormTests(TestCase):
         )
         self.assertTrue(
             Post.objects.filter(
-                text=form_data['text'], 
+                text=form_data['text'],
                 group=form_data['group'],
                 image='posts/small.gif').exists())
 
@@ -98,7 +94,7 @@ class PostCreateFormTests(TestCase):
         self.assertTrue(Post.objects.filter(
             text=form_data['text'], group=form_data['group']).exists())
 
-    def  test_comment_guest_client(self):
+    def test_comment_guest_client(self):
         """Неавторизованный пользователь не может добавить комментарий."""
         post_id = self.post.pk
         comments_count = Comment.objects.count()
@@ -113,30 +109,3 @@ class PostCreateFormTests(TestCase):
             follow=True
         )
         self.assertEqual(comments_count, Comment.objects.count())
-
-
-    # def  test_comment_guest_client(self):
-    #     """Неавторизованный пользователь не может добавить комментарий."""
-    #     post_id = self.post.pk
-    #     comments_count = Comment.objects.count()
-    #     form_data = {
-    #         'post': self.post,
-    #         'author': self.user,
-    #         'text': 'Тестовый комментарий'
-    #     }
-    #     response = self.authorized_client.get('posts:post_detail', args=[post_id])
-    #     comment = 
-    #     self.guest_client.post(
-    #         reverse('posts:add_comment', args=[post_id]),
-    #         data=form_data,
-    #         follow=True
-    #     )
-    #     self.assertIn(comment, response.context)
-
-
-
-
-
-
-
-   

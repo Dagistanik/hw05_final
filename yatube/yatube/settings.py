@@ -1,7 +1,6 @@
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print('ТУТ вывод из сеттингс:', BASE_DIR)
 
 SECRET_KEY = 'hu+@cy)4tlxiqt1$jgq0=h()nc&fffiv*^_3p4kvp(v6jigpcg'
 
@@ -115,5 +114,3 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
-
-# DEFAULT_AUTO_FIELD='django.db.models.AutoField'

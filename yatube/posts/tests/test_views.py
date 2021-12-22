@@ -43,7 +43,7 @@ class StaticURLTests(TestCase):
             image=uploaded
         )
         cls.comment = Comment.objects.create(
-            post= cls.post,
+            post=cls.post,
             author=cls.user,
             text='Тестовый комментарий'
         )
@@ -194,11 +194,11 @@ class StaticURLTests(TestCase):
         page_obj = response.context['page_obj']
         self.assertNotIn(self.post, page_obj)
 
-    
     def test_comment_add_post_detail(self):
         """Проверка что комментарий появляется на странице поста"""
         post_id = self.post.pk
-        response = self.authorized_client.get(reverse('posts:post_detail', args=[post_id]))
+        response = self.authorized_client.get(
+            reverse('posts:post_detail', args=[post_id]))
         comments = response.context['comments']
         self.assertIn(self.comment, comments)
 

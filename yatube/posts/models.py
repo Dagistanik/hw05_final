@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from .validators import validate_not_empty
-import datetime
 User = get_user_model()
 
 
@@ -67,6 +66,7 @@ class Post(models.Model):
     def __str__(self):
         return self.text[:15]
 
+
 class Comment(models.Model):
     post = models.ForeignKey(
         Post,
@@ -87,6 +87,7 @@ class Comment(models.Model):
     created = models.DateTimeField(
         auto_now_add=True
     )
+
 
 class Follow(models.Model):
     user = models.ForeignKey(

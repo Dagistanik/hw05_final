@@ -1,5 +1,4 @@
 from django.shortcuts import redirect, render, get_object_or_404
-from django.views.decorators.cache import cache_page
 from yatube.settings import PAGE_NUM
 from posts.models import Post, Group, User, Follow
 from django.core.paginator import Paginator
@@ -8,7 +7,6 @@ from django.views.decorators.csrf import csrf_exempt
 from posts.forms import PostForm, CommentForm
 
 
-@cache_page(20)
 def index(request):
     post_list = Post.objects.all()
     paginator = Paginator(post_list, PAGE_NUM)
@@ -131,11 +129,8 @@ def add_comment(request, post_id):
         comment.post = post
         comment.save()
         for comm in post.comments.all():
-            print(comm.text)    
+            print(comm.text)
     return redirect('posts:post_detail', post_id=post_id)
-
-
-
 
 
 @login_required
@@ -149,11 +144,12 @@ def follow_index(request):
     page_obj = paginator.get_page(page_number)
     posts = Post.objects.all()
     context = {
-        'title':title,
+        'title': title,
         'page_obj': page_obj,
-        'posts':posts,
+        'posts': posts,
     }
     return render(request, 'posts/follow.html', context)
+
 
 @login_required
 def profile_follow(request, username):
@@ -164,8 +160,10 @@ def profile_follow(request, username):
         Follow.objects.get_or_create(user=user, author=author)
     return redirect('posts:profile', username=username)
 
+
 @login_required
 def profile_unfollow(request, username):
     """Отписка от автора"""
-    get_object_or_404(Follow, user=request.user, author__username=username).delete()
+    get_object_or_404(
+        Follow, user=request.user, author__username=username).delete()
     return redirect('posts:profile', username=username)
