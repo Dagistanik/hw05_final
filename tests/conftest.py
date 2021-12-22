@@ -23,6 +23,7 @@ if FILENAME not in project_dir_content:
         f'Убедитесь, что у вас верная структура проекта.'
     )
 
+# import get_version from django.utils.version
 from django.utils.version import get_version
 
 assert get_version() < '3.0.0', 'Пожалуйста, используйте версию Django < 3.0.0'
