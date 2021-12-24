@@ -8,7 +8,7 @@
     <ul class="list-group list-group-flush">
       <li class="list-group-item"> Дата публикации: {{ post.pub_date }}</li> 
       {% if post.group.slug %} 
-      <li class="list-group-item"> Группа: {{ post.group.title }}
+        <li class="list-group-item"> Группа: {{ post.group.title }}
         <a href="{% url 'posts:slug' post.group.slug %}">все записи группы</a>
       </li> 
       {% endif %} 
@@ -42,7 +42,7 @@
         Редактировать запись
     </a>
     {% endif %}
-    {% include 'posts/comments.html' %}
+    {% include 'posts/includes/comments.html' %}
   </article>
 </div> 
 {% endblock %}  

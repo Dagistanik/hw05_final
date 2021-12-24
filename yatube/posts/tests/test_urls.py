@@ -27,7 +27,6 @@ class StaticURLTests(TestCase):
 
     def tearDown(self):
         super().tearDown()
-        # cache_key = make_template_fragment_key('index')
         cache.clear()
 
     def test_homepage(self):
@@ -75,14 +74,14 @@ class StaticURLTests(TestCase):
 
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        post_id = str(self.post.pk)
         templates_url_names = {
             '/': 'posts/index.html',
             '/group/test-slug/': 'posts/group_list.html',
             '/profile/test_user/': 'posts/profile.html',
-            '/posts/' + post_id + '/': 'posts/post_detail.html',
-            '/posts/' + post_id + '/edit/': 'posts/create_post.html',
-            '/create/': 'posts/create_post.html'
+            '/posts/' + f'{self.post.pk}' + '/': 'posts/post_detail.html',
+            '/posts/' + f'{self.post.pk}' + '/edit/': 'posts/create_post.html',
+            '/create/': 'posts/create_post.html',
+            '/follow/': 'posts/follow.html',
         }
         for adress, template in templates_url_names.items():
             with self.subTest(adress=adress):

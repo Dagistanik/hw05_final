@@ -47,7 +47,7 @@ def profile(request, username):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     posts_num = posts.count()
-    title = 'Профайл пользователя ' + str(username.get_full_name())
+    title = 'Профайл пользователя ' + f'{username.get_full_name()}'
     following = Follow.objects.filter(author=username).exists()
     context = {
         'username': username,
@@ -128,25 +128,19 @@ def add_comment(request, post_id):
         comment.author = request.user
         comment.post = post
         comment.save()
-        for comm in post.comments.all():
-            print(comm.text)
     return redirect('posts:post_detail', post_id=post_id)
 
 
 @login_required
 def follow_index(request):
     title = 'Авторы, на которых подписан пользователь'
-    follow = Follow.objects.filter(user=request.user)
-    following_author = User.objects.filter(following__in=follow)
-    post_list = Post.objects.filter(author__in=following_author)
+    post_list = Post.objects.filter(author__following__user=request.user)
     paginator = Paginator(post_list, PAGE_NUM)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    posts = Post.objects.all()
     context = {
         'title': title,
         'page_obj': page_obj,
-        'posts': posts,
     }
     return render(request, 'posts/follow.html', context)
 
@@ -164,6 +158,8 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     """Отписка от автора"""
-    get_object_or_404(
-        Follow, user=request.user, author__username=username).delete()
+    if Follow.objects.filter(user=request.user,
+                             author__username=username).exists():
+        Follow.objects.filter(
+            user=request.user, author__username=username).delete()
     return redirect('posts:profile', username=username)

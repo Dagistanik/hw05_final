@@ -88,6 +88,9 @@ class Comment(models.Model):
         auto_now_add=True
     )
 
+    def __str__(self):
+        return self.text[:15]
+
 
 class Follow(models.Model):
     user = models.ForeignKey(
@@ -104,3 +107,12 @@ class Follow(models.Model):
         on_delete=models.SET_NULL,
         null=True
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'], name='one_follow'),
+        ]
+
+    def __str__(self):
+        return f'{self.user} подписан на {self.author}'

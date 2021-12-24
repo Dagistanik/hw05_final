@@ -26,16 +26,7 @@ class PostCreateFormTests(TestCase):
             slug='test-slug',
             description='Тестовое описание',
         )
-        cls.post = Post.objects.create(
-            author=cls.user,
-            group=cls.group,
-            text='Тестовый текст',
-        )
-        cls.comment = Comment.objects.create(
-            post=cls.post,
-            author=cls.user,
-            text='Тестовый комментарий'
-        )
+        
 
     @classmethod
     def tearDownClass(cls):
@@ -80,6 +71,11 @@ class PostCreateFormTests(TestCase):
 
     def test_edit_post(self):
         """Происходит изменение поста"""
+        self.post = Post.objects.create(
+            author=self.user,
+            group=self.group,
+            text='Тестовый текст',
+        )
         post_id = self.post.pk
         expected_text = 'Изменённый текст'
         form_data = {
@@ -93,6 +89,34 @@ class PostCreateFormTests(TestCase):
         )
         self.assertTrue(Post.objects.filter(
             text=form_data['text'], group=form_data['group']).exists())
+
+
+class TestCommens(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create(username='admin')
+        cls.authorized_client = Client()
+        cls.guest_client = Client()
+        cls.group = Group.objects.create(
+            title='Тестовая группа',
+            slug='test-slug',
+            description='Тестовое описание',
+        )
+        cls.post = Post.objects.create(
+            author=cls.user,
+            group=cls.group,
+            text='Тестовый текст',
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+
+    def setUp(self):
+        self.authorized_client.force_login(self.user)
+
 
     def test_comment_guest_client(self):
         """Неавторизованный пользователь не может добавить комментарий."""
@@ -109,3 +133,19 @@ class PostCreateFormTests(TestCase):
             follow=True
         )
         self.assertEqual(comments_count, Comment.objects.count())
+
+    def test_comment_authorized_client(self):
+        """Авторизованный пользователь может добавить комментарий."""
+        post_id = self.post.pk
+        comments_count = Comment.objects.count()
+        form_data = {
+            'post': self.post,
+            'author': self.user,
+            'text': 'Тестовый комментарий'
+        }
+        self.authorized_client.post(
+            reverse('posts:add_comment', args=[post_id]),
+            data=form_data,
+            follow=True
+        )
+        self.assertEqual(comments_count +1, Comment.objects.count())

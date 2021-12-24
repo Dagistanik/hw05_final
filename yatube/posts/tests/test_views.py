@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
-from posts.models import Group, Post, Comment
+from posts.models import Group, Post, Comment, Follow
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django import forms
 from django.core.cache import cache
-# from django.core.cache.utils import make_template_fragment_key
 
 
 User = get_user_model()
@@ -56,7 +55,6 @@ class StaticURLTests(TestCase):
 
     def tearDown(self):
         super().tearDown()
-        # cache_key = make_template_fragment_key('index')
         cache.clear()
 
     def test_pages_uses_correct_template(self):
@@ -208,6 +206,7 @@ class TestPaginator(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create(username='test_user')
+        cls.author = User.objects.create(username="author")
         cls.group = Group.objects.create(
             title=('Тестовая группа'),
             slug=('test-slug0'),
@@ -227,7 +226,7 @@ class TestPaginator(TestCase):
         self.user = User.objects.create_user(username='Dagik')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-
+        
     def test_index_paginator(self):
         """Паджинация страницы index работает верно"""
         response = self.client.get(reverse('posts:index'))
@@ -252,3 +251,100 @@ class TestPaginator(TestCase):
         response = self.client.get(
             reverse('posts:profile', args=['test_user']) + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 3)
+
+class TestPaginatorIndex(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create(username='test_user')
+        cls.author = User.objects.create(username="author")
+        cls.group = Group.objects.create(
+            title=('Тестовая группа'),
+            slug=('test-slug0'),
+            description=('тестовое описание'),
+        )
+        cls.posts = []
+        for i in range(13):
+            post = Post.objects.create(
+                author=cls.author,
+                text=(f'Тестовый текст{i}'),
+                group=(Group.objects.get(slug='test-slug0'))
+            )
+            cls.posts.append(post)
+        Follow.objects.create(
+            user = cls.user,
+            author = cls.author
+        )
+
+    def setUp(self):
+        self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_follow_index_paginator(self):
+        """Паджинация страницы follow_index работает верно"""
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertEqual(len(response.context['page_obj']), 10)
+        response = self.authorized_client.get(reverse('posts:follow_index') + '?page=2')
+        self.assertEqual(len(response.context['page_obj']), 3)
+
+
+class TestFollow(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.author = User.objects.create_user(username='test_author')
+        cls.post = Post.objects.create(
+            text='Тестовый текст подписки',
+            author=cls.author,
+        )
+
+    def setUp(self):
+        self.guest_client = Client()
+        self.user = User.objects.create_user(username='Dagik')
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_user_subscription(self):
+        """Авторизованный пользователь может подписываться на других
+        пользователей.
+        """
+        self.authorized_client.get(
+            reverse('posts:profile_follow', args=[self.author]))
+        following = Follow.objects.filter(author=self.author).exists()
+        self.assertTrue(following)
+
+    def test_unsubscribing_users(self):
+        """Авторизованный пользователь может удалять других пользователей
+        из подписок.
+        """
+        self.authorized_client.get(
+            reverse('posts:profile_follow', args=[self.author]))
+        self.authorized_client.get(
+            reverse('posts:profile_unfollow', args=[self.author.username]))
+        following = Follow.objects.filter(author=self.author).exists()
+        self.assertFalse(following)
+
+    def test_adding_subscriptions_feed(self):
+        """Новая запись пользователя появляется в ленте тех, кто на него
+        подписан.
+        """
+        self.authorized_client.get(
+            reverse('posts:profile_follow', args=[self.author]))
+        post = Post.objects.create(
+            text='Тестовый текст появление записи',
+            author=self.author,
+        )
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertIn(post, response.context['page_obj'])
+
+    def test_not_adding_subscriptions_feed(self):
+        """Новая запись пользователя не появляется в ленте тех, кто не
+        подписан.
+        """
+        post = Post.objects.create(
+            text='хуестоый текст появление записи',
+            author=self.author,
+        )
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertNotIn(post, response.context['page_obj'])
