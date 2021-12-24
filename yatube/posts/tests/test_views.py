@@ -226,7 +226,7 @@ class TestPaginator(TestCase):
         self.user = User.objects.create_user(username='Dagik')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-        
+
     def test_index_paginator(self):
         """Паджинация страницы index работает верно"""
         response = self.client.get(reverse('posts:index'))
@@ -252,6 +252,7 @@ class TestPaginator(TestCase):
             reverse('posts:profile', args=['test_user']) + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 3)
 
+
 class TestPaginatorIndex(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -272,8 +273,8 @@ class TestPaginatorIndex(TestCase):
             )
             cls.posts.append(post)
         Follow.objects.create(
-            user = cls.user,
-            author = cls.author
+            user=cls.user,
+            author=cls.author
         )
 
     def setUp(self):
@@ -285,7 +286,8 @@ class TestPaginatorIndex(TestCase):
         """Паджинация страницы follow_index работает верно"""
         response = self.authorized_client.get(reverse('posts:follow_index'))
         self.assertEqual(len(response.context['page_obj']), 10)
-        response = self.authorized_client.get(reverse('posts:follow_index') + '?page=2')
+        response = self.authorized_client.get(
+            reverse('posts:follow_index') + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 3)
 
 

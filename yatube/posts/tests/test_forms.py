@@ -26,7 +26,6 @@ class PostCreateFormTests(TestCase):
             slug='test-slug',
             description='Тестовое описание',
         )
-        
 
     @classmethod
     def tearDownClass(cls):
@@ -117,7 +116,6 @@ class TestCommens(TestCase):
     def setUp(self):
         self.authorized_client.force_login(self.user)
 
-
     def test_comment_guest_client(self):
         """Неавторизованный пользователь не может добавить комментарий."""
         post_id = self.post.pk
@@ -148,4 +146,4 @@ class TestCommens(TestCase):
             data=form_data,
             follow=True
         )
-        self.assertEqual(comments_count +1, Comment.objects.count())
+        self.assertEqual(comments_count + 1, Comment.objects.count())
