@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from .validators import validate_not_empty
+
+
 User = get_user_model()
 
 
@@ -50,7 +52,7 @@ class Post(models.Model):
         help_text='Выберите группу'
     )
     text = models.TextField(
-        validators=[validate_not_empty],
+        validators=(validate_not_empty,),
         verbose_name='Текст поста',
         help_text='Введите текст поста'
     )
@@ -109,10 +111,10 @@ class Follow(models.Model):
     )
 
     class Meta:
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
-                fields=['user', 'author'], name='one_follow'),
-        ]
+                fields=('user', 'author'), name='one_follow'),
+        )
 
     def __str__(self):
         return f'{self.user} подписан на {self.author}'

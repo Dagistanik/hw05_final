@@ -47,7 +47,7 @@ def profile(request, username):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     posts_num = posts.count()
-    title = 'Профайл пользователя ' + f'{username.get_full_name()}'
+    title = f'Профайл пользователя {username.get_full_name()}'
     following = Follow.objects.filter(author=username).exists()
     context = {
         'username': username,
@@ -158,8 +158,9 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     """Отписка от автора"""
-    if Follow.objects.filter(user=request.user,
-                             author__username=username).exists():
-        Follow.objects.filter(
-            user=request.user, author__username=username).delete()
+    follower = Follow.objects.filter(
+        user=request.user, author__username=username)
+    if follower.exists():
+        follower.delete()
     return redirect('posts:profile', username=username)
+    # return render(request, 'posts/profile.html')

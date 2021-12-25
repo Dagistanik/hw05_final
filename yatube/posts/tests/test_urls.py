@@ -72,6 +72,12 @@ class StaticURLTests(TestCase):
         self.assertRedirects(
             response, '/auth/login/?next=/create/')
 
+    def test_unfollow(self):
+        """Проверка страницы unfolow"""
+        user = self.user.username
+        response = self.authorized_client.get(f'/profile/{ user }/unfollow/')
+        self.assertEqual(response.status_code, 302)
+
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         templates_url_names = {

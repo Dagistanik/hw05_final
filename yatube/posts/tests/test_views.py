@@ -320,8 +320,7 @@ class TestFollow(TestCase):
         """Авторизованный пользователь может удалять других пользователей
         из подписок.
         """
-        self.authorized_client.get(
-            reverse('posts:profile_follow', args=[self.author]))
+        Follow.objects.create(author=self.author, user=self.user)
         self.authorized_client.get(
             reverse('posts:profile_unfollow', args=[self.author.username]))
         following = Follow.objects.filter(author=self.author).exists()

@@ -108,11 +108,6 @@ class TestCommens(TestCase):
             text='Тестовый текст',
         )
 
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
-
     def setUp(self):
         self.authorized_client.force_login(self.user)
 
@@ -135,7 +130,6 @@ class TestCommens(TestCase):
     def test_comment_authorized_client(self):
         """Авторизованный пользователь может добавить комментарий."""
         post_id = self.post.pk
-        comments_count = Comment.objects.count()
         form_data = {
             'post': self.post,
             'author': self.user,
@@ -146,4 +140,8 @@ class TestCommens(TestCase):
             data=form_data,
             follow=True
         )
-        self.assertEqual(comments_count + 1, Comment.objects.count())
+        self.assertTrue(Comment.objects.filter(
+            text=form_data['text'],
+            author=form_data['author'],
+            post=form_data['post'])
+        )
