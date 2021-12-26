@@ -163,4 +163,3 @@ def profile_unfollow(request, username):
     if follower.exists():
         follower.delete()
     return redirect('posts:profile', username=username)
-    # return render(request, 'posts/profile.html')

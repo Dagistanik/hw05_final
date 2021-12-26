@@ -344,7 +344,7 @@ class TestFollow(TestCase):
         подписан.
         """
         post = Post.objects.create(
-            text='хуестоый текст появление записи',
+            text='Тестовый текст появление записи',
             author=self.author,
         )
         response = self.authorized_client.get(reverse('posts:follow_index'))
