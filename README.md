@@ -36,6 +36,12 @@ python -m pip install --upgrade pip
 ```python
 pip install -r requirements.txt
 ```
+
+* Запуск проекта
+
+```python
+python manage.py runserver
+```
 #### Язык
 
 * Python 3.7
